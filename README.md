@@ -32,9 +32,27 @@ ejercicios indicados.
 - Analice el script `wav2lp.sh` y explique la misión de los distintos comandos involucrados en el *pipeline*
   principal (`sox`, `$X2X`, `$FRAME`, `$WINDOW` y `$LPC`). Explique el significado de cada una de las 
   opciones empleadas y de sus valores.
+  
+  En primer lugar nos encontramos con el `SoX` (Sound eXchange), el qual tiene la función de realizar múltiples tareas con ficheros de audio. Una de las más destacadas es la de convertir un fichero o señal al formato que queremos a partir de otra señal con un formato no deseado. Además, también puede ser útil para realizar reducciones de ruido.
+  
+  El `$X2X` sirve para realizar la conversión entre distintos formatos de datos. Nosotros lo utilizamos para pasar de un signed integer de 16 bits a short float y de float a ascii patra ser capaces de poder guardar la fmatrix en un fichero.
+  
+  Tenemos también el `$FRAME`, el cual extrae las ventanas de la secuencia de datos con una longitud de 240 i un periodo de 80.
+  
+  El comando `$WINDOW` nos da imformación y detalles sobre la ventana. En nuestro caso, tanto los datos de entrada como los de salida tienen una la longitud de 240:
+       * Longitud de entrada : `-l 240`
+       * Longitud de salida  : `-L 240`
+ 
+ Para acabar, el comando `$LPC` calcula los coeficientes LPC mediante el uso del método de Levinson-Durbin. Los parametros que se usan son un frame length de 240 (`-l 240`) y un orden de LPC que decidamos (`-m`).
 
 - Explique el procedimiento seguido para obtener un fichero de formato *fmatrix* a partir de los ficheros de
   salida de SPTK (líneas 45 a 51 del script `wav2lp.sh`).
+  
+  Antes de explicar el procedimiento de creación de un fichero de formato *fmatrix*, hemos de saber que se trata de una matriz que incluye el numero de filas(`nrow`) y todos sus coeficientes (`ncol`). 
+  
+  Las filas calculadas hacen referencia a las tramas de la señal. En cambio, las columnas se corresponden a los coeficientes de cada trama. Para calcular el número de columnas, lo haremos sumando uno al número de coeficientes del orden del predictor lineal ya que en el primer elemento del vector se almacena la ganancia de predicción. Por otro lado, el número de filas depende de la longitud de la señal, la longitud y desplazamiento de la ventana, y la cadena de comandos que se ejecutan para obtener la paramtrización. Por lo explicado anteriormente, para obtener el numero de filas tendremos que:
+      * Convertir la señal paramtrizada a texto mediante `&X2X`
+      * Contabilizar las filas mediante el comando `wc -l`
 
   * ¿Por qué es más conveniente el formato *fmatrix* que el SPTK?
 
