@@ -4,7 +4,7 @@
 set -o pipefail
 
 ## \file
-## \TODO This file implements a very trivial feature extraction; use it as a template for other front ends.
+## \DONE This file implements a very trivial feature extraction; use it as a template for other front ends.
 ## 
 ## Please, read SPTK documentation and some papers in order to implement more advanced front ends.
 
@@ -43,7 +43,7 @@ fi
 
 # Main command for feature extration
 sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $WINDOW -l 240 -L 240 |
-	$LPC -l 240 -m $lpc_order > $base.lp || exit 1
+	$LPC -l 240 -m $lpc_order > $base.lp
    
 
 # Our array files need a header with the number of cols and rows:
@@ -53,3 +53,5 @@ nrow=`$X2X +fa < $base.lp | wc -l | perl -ne 'print $_/'$ncol', "\n";'`
 # Build fmatrix file by placing nrow and ncol in front, and the data after them
 echo $nrow $ncol | $X2X +aI > $outputfile
 cat $base.lp >> $outputfile
+
+exit

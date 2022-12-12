@@ -24,10 +24,10 @@ int read_gmms(const Directory &dir, const Ext &ext, const vector<string> &gmm_fi
 float verify(const GMM &gmm_candidate, const fmatrix &dat)
 {
 
-	//TODO: implement verification score based on gmm of the candidate
-	/// \DONE
-	float score = gmm_candidate.logprob(dat);
-	return score;
+  /// \DONE implement verification score based on gmm of the candidate
+
+  float score = gmm_candidate.logprob(dat);
+  return score;
 }
 
 
@@ -73,7 +73,7 @@ int main(int argc, const char *argv[])
 	#endif
 
 	/*
-	  Toni: I have implemented the reading of arguments for multiple GMM/Features. Read GMMs
+	  I have implemented the reading of arguments for multiple GMM/Features. Read GMMs
 	  But here I will only use the first set of GMM/vectors.
 
 	  You can use data like this ...

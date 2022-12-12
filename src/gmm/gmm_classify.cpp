@@ -22,22 +22,23 @@ int read_gmms(const Directory &dir, const Ext &ext, const vector<string> &gmm_fi
 int classify(const vector<GMM> &vgmm, const fmatrix &dat, float &maxlprob)
 {
 	float  lprob;
-	int maxind  = -1;
-	maxlprob = -1e38;
+  int maxind  = -1;
+  maxlprob = -1e38;
 
-	//TODO Assign maxind to the best index of vgmm calling 'logprob' for each gmm. Implement this function in gmm.cpp
-	/// \DONE
-	maxind = 0;
+  //DONE .. assign maxind to the best index of vgmm
+  //for each gmm, call logprob. Implement this function in gmm.cpp
+  maxind = 0;
+  unsigned int ind;
+  for (ind = 0; ind < vgmm.size(); ind++) {
+    lprob = vgmm[ind].logprob(dat);
 
-	for(unsigned int i = 0; i < vgmm.size(); i++){
-		lprob = vgmm[i].logprob(dat);
-		if(lprob > maxlprob){
-			maxlprob = lprob;
-			maxind = i;
-		}
-	}
+    if (lprob > maxlprob) {
+        maxlprob = lprob;
+        maxind = ind;
+    }
+  }
 
-	return maxind;
+  return maxind;
 }
 
 
@@ -63,7 +64,7 @@ int main(int argc, const char *argv[])
 	#endif
 
 	/*
-	  Toni: I have implemented the reading of arguments for multiple GMM/Features. Read GMMs
+	  I have implemented the reading of arguments for multiple GMM/Features. Read GMMs
 	  But here I will only use the first set of GMM/vectors.
 
 	  You can use data like this ...

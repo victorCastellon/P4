@@ -51,38 +51,38 @@ int main(int argc, const char *argv[])
 
 	GMM gmm;
 
-	/// \TODO Initialize GMM from data; initially, you should implement random initialization.
-	/// \DONE initicialization method done
-	/// Other alternatives are: vq, em_split... See the options of the program and place each
-	/// initicialization accordingly.
-	switch (init_method) {
-		case 0:
-			gmm.random_init(data, nmix);
-			break;
-		case 1:
-			break;
-		case 2:
-			break;
-		default:
-			;
-	}
+  /// \DONE Initialize GMM from data; initially, you should implement random initialization.
+  /// 
+  /// Other alternatives are: vq, em_split... See the options of the program and place each
+  /// initicialization accordingly.
+  switch (init_method) {
+  case 0:
+    gmm.random_init(data, nmix);
+    break;
+  case 1:
+    gmm.vq_lbg(data, nmix, init_iterations, init_threshold, verbose);
+    break;
+  case 2:
+    gmm.em_split(data, nmix, init_iterations, init_threshold, verbose);
+    break;
+  default:
+    ;
+  }
 
-	/// \TODO Apply EM to estimate GMM parameters (complete the funcion in gmm.cpp)
-	/// \DONE EM parameters
+  /// \DONE Apply EM to estimate GMM parameters (complete the funcion in gmm.cpp)
+    gmm.em(data, em_iterations, em_threshold, verbose);
 
-	gmm.em(data, em_iterations, em_threshold, verbose);
+  //Create directory, if it is needed
+  gmm_filename.checkDir();
+  //Save gmm
+  ofstream ofs(gmm_filename.c_str(), ios::binary);
+  ofs << gmm;
+  
+  bool show_gmm=false;
+  if (show_gmm)
+    gmm.print(cout);
 
-	//Create directory, if it is needed
-	gmm_filename.checkDir();
-	//Save gmm
-	ofstream ofs(gmm_filename.c_str(), ios::binary);
-	ofs << gmm;
-
-	bool show_gmm=false;
-	if (show_gmm)
-		gmm.print(cout);
-
-	return 0;
+  return 0;
 }
 
 
