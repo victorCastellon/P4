@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## \file
-## \DONE This file implements a very trivial feature extraction; use it as a template for other front ends.
+## \TODO This file implements a very trivial feature extraction; use it as a template for other front ends.
 ## 
 ## Please, read SPTK documentation and some papers in order to implement more advanced front ends.
 
@@ -15,12 +15,12 @@ cleanup() {
 }
 
 if [[ $# != 4 ]]; then
-   echo "$0 lpcorder lpc2corder input.wav output.lp"
+   echo "$0 lpc_order lpc2c_order input.wav output.lp"
    exit 1
 fi
 
-lpcorder=$1
-lpccorder=$2
+lpc_order=$1
+lpcc_order=$2
 inputfile=$3
 outputfile=$4
 
@@ -43,10 +43,10 @@ fi
 
 # Main command for feature extration
 sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $WINDOW -l 240 -L 240 |
-	$LPC -l 240 -m $lpcorder | $LPCC -m $lpcorder -M $lpccorder > $base.lp
+	$LPC -l 240 -m $lpc_order | $LPCC -m $lpc_order -M $lpcc_order > $base.lp
 
 # Our array files need a header with the number of cols and rows:
-ncol=$((lpccorder+1)) # lpc2c M =>  (c0 c1 c2 ... cM) 
+ncol=$((lpcc_order+1)) # lpc2c M =>  (c0 c1 c2 ... cM) 
 nrow=`$X2X +fa < $base.lp | wc -l | perl -ne 'print $_/'$ncol', "\n";'`
 
 # Build fmatrix file by placing nrow and ncol in front, and the data after them

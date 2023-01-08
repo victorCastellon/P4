@@ -15,17 +15,17 @@ set -o pipefail
 # - lists:    directory with the list of signal files
 # - w:        a working directory for temporary files
 # - name_exp: name of the experiment
-# - db_devel: directory of the speecon database used during development
-# - db_test:  directory of the database used in the final test
-# //DONE
-lists=lists
-w=work
+# - db:       directory of the speecon database 
+lists=lists # directorio donde están las listas del fichero de señal.
+w=work # es donde metemos llos ficheros de todo el experimento.
 name_exp=one
-db_devel=spk_8mu/speecon
-db_test=spk_8mu/sr_test
-world=users
+db_dev=spk_8mu/speecon
+db_final=spk_8mu/sr_test
+world=users_and_others
+init_method=2
 
-
+TRAIN_OPTS="-T 1.e-6 -N256 -m 32"
+WORLD_OPTS="-T 1.e-6 -N128 -m 32"
 # Ficheros de resultados del reconocimiento y verificación
 LOG_CLASS=$w/class_${FEAT}_${name_exp}.log
 LOG_VERIF=$w/verif_${FEAT}_${name_exp}.log
@@ -37,23 +37,6 @@ FINAL_VERIF=$w/verif_test.log
 # temporal para almacenar este resultado intermedio
 TEMP_VERIF=$w/temp_${FEAT}_${name_exp}.log
 
-# Para inicializar la GMM se usara el threshold, por eso se escoge un número
-# tan alto de iteraciones
-verbosity=255
-gmm_threshold=0.001
-gmm_N=64    # Iteraciones
-gmm_m=32    # Numero gausianas
-
-# Init method for the GMM
-#   0: Random
-#   1: VQ
-#   2: EM split
-init_method=2
-
-lp_coefs=25
-lpcc_coefs=25
-mfcc_coefs=20
-mfcc_banks=33
 
 # ------------------------
 # Usage
@@ -93,27 +76,27 @@ fi
 # ----------------------------
 
 ## @file
-# \DONE
+# \TODO
 # Create your own features with the name compute_$FEAT(), where $FEAT is the name of the feature.
 # - Select (or change) different features, options, etc. Make you best choice and try several options.
+
 
 compute_lp() {
     db=$1
     shift
     for filename in $(sort $*); do
         mkdir -p `dirname $w/$FEAT/$filename.$FEAT`
-        EXEC="wav2lp $lp_coefs $db/$filename.wav $w/$FEAT/$filename.$FEAT"
+        EXEC="wav2lp 16 $db/$filename.wav $w/$FEAT/$filename.$FEAT"
         echo $EXEC && $EXEC || exit 1
     done
 }
 
 compute_lpcc() {
-    lp_coefs=$lpcc_coefs
     db=$1
     shift
     for filename in $(sort $*); do
         mkdir -p `dirname $w/$FEAT/$filename.$FEAT`
-        EXEC="wav2lpcc $lp_coefs $lpcc_coefs $db/$filename.wav $w/$FEAT/$filename.$FEAT"
+        EXEC="wav2lpcc 25 25 $db/$filename.wav $w/$FEAT/$filename.$FEAT"
         echo $EXEC && $EXEC || exit 1
     done
 }
@@ -123,25 +106,21 @@ compute_mfcc() {
     shift
     for filename in $(sort $*); do
         mkdir -p `dirname $w/$FEAT/$filename.$FEAT`
-
-        # Numero de coefs: Documento 2c "Representation of the speech signal
-        # for ASR" pag. 22
-        EXEC="wav2mfcc $mfcc_coefs $mfcc_banks $db/$filename.wav $w/$FEAT/$filename.$FEAT"
+        EXEC="wav2mfcc 20 37 $db/$filename.wav $w/$FEAT/$filename.$FEAT"
         echo $EXEC && $EXEC || exit 1
     done
 }
 
-
 #  Set the name of the feature (not needed for feature extraction itself)
 if [[ ! -n "$FEAT" && $# > 0 && "$(type -t compute_$1)" = function ]]; then
-    FEAT=$1
+	FEAT=$1
 elif [[ ! -n "$FEAT" ]]; then
-    echo "Variable FEAT not set. Please rerun with FEAT set to the desired feature."
-    echo
-    echo "For instance:"
-    echo "    FEAT=mfcc $0 $*"
+	echo "Variable FEAT not set. Please rerun with FEAT set to the desired feature."
+	echo
+	echo "For instance:"
+	echo "    FEAT=mfcc $0 $*"
 
-    exit 1
+	exit 1
 fi
 
 # ---------------------------------
@@ -155,12 +134,13 @@ for cmd in $*; do
 
    if [[ $cmd == train ]]; then
        ## @file
-       # \TODO
-       # Select (or change) good parameters for gmm_train
-       for dir in $db_devel/BLOCK*/SES* ; do
+	   # \TODO
+       # \DONE
+	   # Select (or change) good parameters for gmm_train
+       for dir in $db_dev/BLOCK*/SES* ; do
            name=${dir/*\/}
            echo $name ----
-           EXEC="gmm_train -v $verbosity -T $gmm_threshold -N $gmm_N -m $gmm_m -i $init_method -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$name.gmm $lists/class/$name.train"
+           EXEC="gmm_train -v 1 $TRAIN_OPTS -i $init_method -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$name.gmm $lists/class/$name.train"
            echo $EXEC && $EXEC || exit 1
            echo
        done
@@ -182,26 +162,27 @@ for cmd in $*; do
 
    elif [[ $cmd == trainworld ]]; then
        ## @file
-	   # \DONE
-       # Implement 'trainworld' in order to get a Universal Background Model for speaker verification
-       #
-       # - The name of the world model will be used by gmm_verify in the 'verify' command below.
-       EXEC="gmm_train -v $verbosity -T $gmm_threshold -N $gmm_N -m $gmm_m -i $init_method -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$world.gmm $lists/verif/$world.train"
-       echo $EXEC && $EXEC || exit 1
-
+	   # \TODO
+       # \DONE
+	   # Implement 'trainworld' in order to get a Universal Background Model for speaker verification
+	   #
+	   # - The name of the world model will be used by gmm_verify in the 'verify' command below.
+       EXEC="gmm_train -v 1 $WORLD_OPTS -i $init_method -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$world.gmm $lists/verif/$world.train"
+        echo $EXEC && $EXEC || exit 1
 
    elif [[ $cmd == verify ]]; then
        ## @file
-	   # \DONE
-       # Implement 'verify' in order to perform speaker verification
-       #
+	   # \TODO 
+       # \DONE 
+	   # Implement 'verify' in order to perform speaker verification
+	   #
        # - The standard output of gmm_verify must be redirected to file $LOG_VERIF.
-       #   For instance:
-       #   * <code> gmm_verify ... > $LOG_VERIF </code>
+	   #   For instance:
+	   #   * <code> gmm_verify ... > $LOG_VERIF </code>
        #   * <code> gmm_verify ... | tee $LOG_VERIF </code>
        EXEC="gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm -w $world $lists/gmm.list $lists/verif/all.test $lists/verif/all.test.candidates"
-       echo $EXEC && $EXEC | tee $TEMP_VERIFY || exit 1
-       
+        echo $EXEC && $EXEC | tee $TEMP_VERIF || exit 1
+
    elif [[ $cmd == verifyerr ]]; then
        if [[ ! -s $TEMP_VERIF ]] ; then
           echo "ERROR: $TEMP_VERIF not created"
@@ -209,29 +190,30 @@ for cmd in $*; do
        fi
        # You can pass the threshold to spk_verif_score.pl or it computes the
        # best one for these particular results.
-       spk_verif_score $TEMP_VERIF | tee $LOG_VERIF
+       spk_verif_score $TEMP_VERIF | tee -a $LOG_VERIF
 
    elif [[ $cmd == finalclass ]]; then
        ## @file
-       # \TODO
-       # Perform the final test on the speaker classification of the files in spk_ima/sr_test/spk_cls.
-       # The list of users is the same as for the classification task. The list of files to be
-       # recognized is lists/final/class.test
+	   # \TODO
+       # \DONE
+	   # Perform the final test on the speaker classification of the files in spk_ima/sr_test/spk_cls.
+	   # The list of users is the same as for the classification task. The list of files to be
+	   # recognized is lists/final/class.test
        #
        # El fichero con el resultado del reconocimiento debe llamarse $FINAL_CLASS, que deberá estar en el
        # directorio de la práctica (PAV/P4).
-       compute_$FEAT $db_test $lists/final/class.test
+       compute_$FEAT $db_final $lists/final/class.test
        EXEC="gmm_classify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm $lists/gmm.list $lists/final/class.test"
-       echo $EXEC && $EXEC | tee $FINAL_CLASS || exit 1
+        echo $EXEC && $EXEC | tee $FINAL_CLASS || exit 1
 
-   
    elif [[ $cmd == finalverif ]]; then
        ## @file
-       # \TODO
-       # Perform the final test on the speaker verification of the files in spk_ima/sr_test/spk_ver.
-       # The list of legitimate users is lists/final/verif.users, the list of files to be verified
-       # is lists/final/verif.test, and the list of users claimed by the test files is
-       # lists/final/verif.test.candidates
+	   # \TODO
+       # \DONE
+	   # Perform the final test on the speaker verification of the files in spk_ima/sr_test/spk_ver.
+	   # The list of legitimate users is lists/final/verif.users, the list of files to be verified
+	   # is lists/final/verif.test, and the list of users claimed by the test files is
+	   # lists/final/verif.test.candidates
        #
        # El fichero con el resultado de la verificación debe llamarse $FINAL_VERIF, que estará en el
        # directorio de la práctica (PAV/P4).
@@ -242,20 +224,19 @@ for cmd in $*; do
        # candidato para la señal a verificar. En $FINAL_VERIF se pide que la tercera columna sea 1,
        # si se considera al candidato legítimo, o 0, si se considera impostor. Las instrucciones para
        # realizar este cambio de formato están en el enunciado de la práctica.
-       compute_$FEAT $db_test $lists/final/verif.test
+       compute_$FEAT $db_final $lists/final/verif.test
        EXEC="gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm -w $world $lists/gmm.list $lists/final/verif.test $lists/final/verif.test.candidates"
-       echo $EXEC && $EXEC | tee $TEMP_VERIF || exit 1 
-
+       echo $EXEC && $EXEC | tee $TEMP_VERIF || exit 1
+       
        perl -ane 'print "$F[0]\t$F[1]\t";
-            if ($F[2] > -3.214) {print "1\n"}
+            if ($F[2] > 0.276933713207707) {print "1\n"}
             else {print "0\n"}' $TEMP_VERIF | tee $FINAL_VERIF
 
    # If the command is not recognize, check if it is the name
    # of a feature and a compute_$FEAT function exists.
    elif [[ "$(type -t compute_$cmd)" = function ]]; then
-       FEAT=$cmd
-       compute_$FEAT $db_devel $lists/class/all.train $lists/class/all.test
-
+	   FEAT=$cmd
+       compute_$FEAT $db_dev $lists/class/all.train $lists/class/all.test      
    else
        echo "undefined command $cmd" && exit 1
    fi

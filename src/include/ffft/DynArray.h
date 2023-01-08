@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-		DynArray.h
-		By Laurent de Soras
+        DynArray.h
+        By Laurent de Soras
 
 --- Legal stuff ---
 
@@ -13,67 +13,89 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 *Tab=3***********************************************************************/
 
+
+
 #if ! defined (ffft_DynArray_HEADER_INCLUDED)
-#define ffft_DynArray_HEADER_INCLUDED
+#define	ffft_DynArray_HEADER_INCLUDED
 
 #if defined (_MSC_VER)
-#pragma once
-#pragma warning (4 : 4250)		 // "Inherits via dominance."
+	#pragma once
+	#pragma warning (4 : 4250) // "Inherits via dominance."
 #endif
 
+
+
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
 
 namespace ffft
 {
 
-	template <class T>
-		class DynArray
-	{
-
-		/*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-		public:
-
-			typedef T   DataType;
-
-			DynArray ();
-			explicit            DynArray (long size);
-			~DynArray ();
-
-			inline long     size () const;
-			inline void     resize (long size);
-
-			inline const DataType &
-				operator [] (long pos) const;
-			inline DataType &
-				operator [] (long pos);
-
-			/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-		protected:
-
-			/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-		private:
-
-			DataType *      _data_ptr;
-			long                _len;
-
-			/*\\\ FORBIDDEN MEMBER FUNCTIONS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-		private:
-
-			DynArray (const DynArray &other);
-			DynArray &      operator = (const DynArray &other);
-			bool                operator == (const DynArray &other);
-			bool                operator != (const DynArray &other);
-
-	};							 // class DynArray
-
-}								 // namespace ffft
 
 
-#include    "ffft/DynArray.hpp"
-#endif							 // ffft_DynArray_HEADER_INCLUDED
+template <class T>
+class DynArray
+{
+
+/*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+public:
+
+	typedef	T	DataType;
+
+						DynArray ();
+	explicit			DynArray (long size);
+						~DynArray ();
+
+	inline long		size () const;
+	inline void		resize (long size);
+
+	inline const DataType &
+						operator [] (long pos) const;
+	inline DataType &
+						operator [] (long pos);
+
+
+
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+protected:
+
+
+
+/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+private:
+
+	DataType *		_data_ptr;
+	long				_len;
+
+
+
+/*\\\ FORBIDDEN MEMBER FUNCTIONS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+private:
+
+						DynArray (const DynArray &other);
+	DynArray &		operator = (const DynArray &other);
+	bool				operator == (const DynArray &other);
+	bool				operator != (const DynArray &other);
+
+};	// class DynArray
+
+
+
+}	// namespace ffft
+
+
+
+#include	"ffft/DynArray.hpp"
+
+
+
+#endif	// ffft_DynArray_HEADER_INCLUDED
+
+
 
 /*\\\ EOF \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
